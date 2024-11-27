@@ -67,21 +67,3 @@ class XYDataset(torch.utils.data.Dataset):
         
     def get_count(self):
         return len(self.annotations)
-
-
-class HeatmapGenerator():
-    def __init__(self, shape, std):
-        self.shape = shape
-        self.std = std
-        self.idx0 = torch.linspace(-1.0, 1.0, self.shape[0]).reshape(self.shape[0], 1)
-        self.idx1 = torch.linspace(-1.0, 1.0, self.shape[1]).reshape(1, self.shape[1])
-        self.std = std
-        
-    def generate_heatmap(self, xy):
-        x = xy[0]
-        y = xy[1]
-        heatmap = torch.zeros(self.shape)
-        heatmap -= (self.idx0 - y)**2 / (self.std**2)
-        heatmap -= (self.idx1 - x)**2 / (self.std**2)
-        heatmap = torch.exp(heatmap)
-        return heatmap
