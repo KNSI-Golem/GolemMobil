@@ -10,10 +10,9 @@ import numpy as np
 
 
 class XYDataset(torch.utils.data.Dataset):
-    def __init__(self, directory, categories, transform=None, random_hflip=False):
+    def __init__(self, directory, transform=None, random_hflip=False):
         super(XYDataset, self).__init__()
         self.directory = directory
-        self.categories = categories
         self.transform = transform
         self.refresh()
         self.random_hflip = random_hflip
@@ -37,7 +36,7 @@ class XYDataset(torch.utils.data.Dataset):
             image = torch.from_numpy(image.numpy()[..., ::-1].copy())
             x = -x
             
-        return image, ann['category_index'], torch.Tensor([x, y])
+        return image, torch.Tensor([x, y])
     
     def _parse(self, path):
         basename = os.path.basename(path)
@@ -48,35 +47,26 @@ class XYDataset(torch.utils.data.Dataset):
         
     def refresh(self):
         self.annotations = []
-        for category in self.categories:
-            category_index = self.categories.index(category)
-            for image_path in glob.glob(os.path.join(self.directory, category, '*.jpg')):
-                x, y = self._parse(image_path)
-                self.annotations += [{
-                    'image_path': image_path,
-                    'category_index': category_index,
-                    'category': category,
-                    'x': x,
-                    'y': y
-                }]
+        for image_path in glob.glob(os.path.join(self.directory, '*.jpg')):
+            x, y = self._parse(image_path)
+            self.annotations += [{
+                'image_path': image_path,
+                'x': x,
+                'y': y
+            }]
         
-    def save_entry(self, category, image, x, y):
-        category_dir = os.path.join(self.directory, category)
-        if not os.path.exists(category_dir):
-            subprocess.call(['mkdir', '-p', category_dir])
+    def save_entry(self, image, x, y):
+        if not os.path.exists(self.directory):
+            subprocess.call(['mkdir', '-p', self.directory])
             
         filename = '%d_%d_%s.jpg' % (x, y, str(uuid.uuid1()))
         
-        image_path = os.path.join(category_dir, filename)
+        image_path = os.path.join(self.directory, filename)
         cv2.imwrite(image_path, image)
         self.refresh()
         
-    def get_count(self, category):
-        i = 0
-        for a in self.annotations:
-            if a['category'] == category:
-                i += 1
-        return i
+    def get_count(self):
+        return len(self.annotations)
 
 
 class HeatmapGenerator():
