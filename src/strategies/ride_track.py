@@ -4,11 +4,18 @@ import ipywidgets
 import torch
 from torch2trt import TRTModule
 
-from jetracer.nvidia_racecar import NvidiaRacecar
 from jetcam.csi_camera import CSICamera
 from jetcam.utils import bgr8_to_jpeg
 
-from src.dataset.utils import preprocess
+# Add src/ directory for imports
+current_path = os.path.abspath(getsourcefile(lambda:0))
+current_dir = os.path.dirname(current_path)
+parent_dir = current_dir[:current_dir.rfind(os.path.sep)]
+sys.path.insert(0, parent_dir)
+
+from config import model_paths
+from dataset.utils import preprocess
+from jetracer.nvidia_racecar import NvidiaRacecar
 
 # Tips:
 # * If the car wobbles left and right,  lower the steering gain
@@ -32,7 +39,7 @@ def live(image, output):
 if __name__ == "__main__":
     # Load the model
     model_trt = TRTModule()
-    model_trt.load_state_dict(torch.load('ft_s_v4_trt.pth'))
+    model_trt.load_state_dict(torch.load(model_paths["ride_track"]))
 
     # Create the racecar&camera class
     car = NvidiaRacecar()
