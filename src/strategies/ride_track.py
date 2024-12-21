@@ -23,19 +23,6 @@ from jetracer.nvidia_racecar import NvidiaRacecar
 # * If the car tends right, make the steering bias more negative (in small increments like -0.05)
 # * If the car tends left, make the steering bias more postive (in small increments +0.05)
 
-def live(image, output):
-    x = output[0]
-    y = output[1]
-
-    x = int(camera.width * (x / 2.0 + 0.5))
-    y = int(camera.height * (y / 2.0 + 0.5))
-
-    prediction = image.copy()
-    prediction = cv2.circle(prediction, (x, y), 8, (255, 0, 0), 3)
-
-    prediction_widget = ipywidgets.Image(format='jpeg', width=camera.width, height=camera.height)
-    prediction_widget.value = bgr8_to_jpeg(prediction)
-
 if __name__ == "__main__":
     # Load the model
     model_trt = TRTModule()
@@ -56,4 +43,3 @@ if __name__ == "__main__":
         image = preprocess(image).half()
         output = model_trt(image).detach().cpu().numpy().flatten()
         car.steering = float(output[0])
-        # live(camera.value, output)
