@@ -1,0 +1,7 @@
+torch~=2.6.0
+torchvision~=0.21.0
+pillow~=11.1.0
+numpy~=2.2.2
+ipywidgets~=8.1.5
+traitlets~=5.14.3
+setuptools~=68.2.0
